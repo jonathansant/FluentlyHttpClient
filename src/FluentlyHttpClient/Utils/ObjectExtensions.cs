@@ -34,5 +34,30 @@ namespace FluentlyHttpClient
 				.Where(p => p.CanRead && p.GetCustomAttribute<IgnoreDataMemberAttribute>() == null)
 				.ToDictionary(p => p.Name, p => p.GetValue(arguments));
 		}
+
+		/// <summary>
+		/// Get the collection as a formatted string e.g. 'User-Agent=google&amp;Locale=en,es'.
+		/// </summary>
+		/// <param name="collection">Collection to format to string.</param>
+		public static string ToFormattedString(this IEnumerable<KeyValuePair<string, IEnumerable<string>>> collection)
+			=> collection.StringifyCollection();
+
+		/// <summary>
+		/// Get the collection as a formatted string e.g. 'User-Agent=google&amp;Locale=en,es'.
+		/// </summary>
+		/// <param name="collection">Collection to format to string.</param>
+		public static string ToFormattedString(this IEnumerable<KeyValuePair<string, string[]>> collection)
+			=> collection.StringifyCollection();
+
+		private static string StringifyCollection<T>(this IEnumerable<KeyValuePair<string, T>> headers)
+			where T : IEnumerable<string>
+		{
+			var concatHeaders = "";
+			foreach (var header in headers)
+				concatHeaders += $"{header.Key}={string.Join(",", header.Value)}&";
+
+			concatHeaders = concatHeaders.TrimEnd('&');
+			return concatHeaders;
+		}
 	}
 }
